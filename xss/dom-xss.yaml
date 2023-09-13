@@ -1,22 +1,24 @@
-id: reflected-xss
+id: dom-xss
 
 info:
-  name: Reflected Cross Site Scripting
-  author: pdteam
+  name: DOM Cross Site Scripting
+  author: theamanrawat
   severity: medium
-  tags: xss,rxss,dast
+  tags: xss,dom,dast
 
 variables:
-  first: "{{rand_int(10000, 99999)}}"
+  num: "{{rand_int(10000, 99999)}}"
 
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+      - action: waitload
 
     payloads:
       reflection:
-        - "'\"><{{first}}"
+        - "'\"><h1>{{num}}</h1>"
 
     fuzzing:
       - part: query
@@ -31,9 +33,13 @@ http:
       - type: word
         part: body
         words:
-          - "{{reflection}}"
+          - "<h1>{{num}}</h1>"
 
       - type: word
         part: header
         words:
           - "text/html"
+
+      - type: status
+        status:
+          - 200
